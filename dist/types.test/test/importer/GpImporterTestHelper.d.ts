@@ -1,0 +1,32 @@
+import { Gp3To5Importer } from '@src/importer/Gp3To5Importer';
+import { Chord } from '@src/model/Chord';
+import { Score } from '@src/model/Score';
+import { Settings } from '@src/Settings';
+export declare class GpImporterTestHelper {
+    static prepareImporterWithFile(name: string, settings?: Settings | null): Promise<Gp3To5Importer>;
+    static prepareImporterWithBytes(buffer: Uint8Array, settings?: Settings | null): Gp3To5Importer;
+    static checkNotes(score: Score): void;
+    static checkTimeSignatures(score: Score): void;
+    static checkDead(score: Score): void;
+    static checkGrace(score: Score): void;
+    static checkAccentuations(score: Score, includeHeavy: boolean): void;
+    static checkHarmonics(score: Score): void;
+    static checkHammer(score: Score): void;
+    static checkBend(score: Score): void;
+    static checkTremolo(score: Score): void;
+    static checkSlides(score: Score): void;
+    static checkStrings(score: Score): void;
+    static checkVibrato(score: Score, checkNotes: boolean): void;
+    static checkTrills(score: Score): void;
+    static checkOtherEffects(score: Score, skipInstrumentCheck?: boolean): void;
+    static checkFingering(score: Score): void;
+    static checkStroke(score: Score): void;
+    static checkTuplets(score: Score): void;
+    static checkRanges(score: Score): void;
+    static checkEffects(score: Score): void;
+    static checkKeySignatures(score: Score): void;
+    static checkColors(score: Score): void;
+    private static createChord;
+    static checkChords(score: Score): void;
+    static checkChord(expected: Chord | null, actual: Chord | null): void;
+}

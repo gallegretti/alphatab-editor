@@ -1,0 +1,31 @@
+import { LayoutMode } from '@src/LayoutMode';
+import { MusicXmlImporter } from '@src/importer/MusicXmlImporter';
+import { Bar } from '@src/model/Bar';
+import { Beat } from '@src/model/Beat';
+import { BendPoint } from '@src/model/BendPoint';
+import { Chord } from '@src/model/Chord';
+import { MasterBar } from '@src/model/MasterBar';
+import { Note } from '@src/model/Note';
+import { PlaybackInformation } from '@src/model/PlaybackInformation';
+import { Score } from '@src/model/Score';
+import { Section } from '@src/model/Section';
+import { Staff } from '@src/model/Staff';
+import { Track } from '@src/model/Track';
+import { Voice } from '@src/model/Voice';
+export declare class MusicXmlImporterTestHelper {
+    static prepareImporterWithBytes(buffer: Uint8Array): MusicXmlImporter;
+    static testReferenceFile(file: string, renderLayout?: LayoutMode, renderAllTracks?: boolean): Promise<Score>;
+    protected static getHierarchy(node: unknown): string;
+    protected expectScoreEqual(expected: Score, actual: Score): void;
+    protected expectTrackEqual(expected: Track, actual: Track): void;
+    protected expectStaffEqual(expected: Staff, actual: Staff): void;
+    protected expectBarEqual(expected: Bar, actual: Bar): void;
+    protected expectVoiceEqual(expected: Voice, actual: Voice): void;
+    protected expectBeatEqual(expected: Beat, actual: Beat): void;
+    protected expectNoteEqual(expected: Note, actual: Note): void;
+    protected expectChordEqual(expected: Chord | null, actual: Chord): void;
+    protected expectBendPointsEqual(expected: BendPoint[], actual: BendPoint[]): void;
+    protected expectPlaybackInformationEqual(expected: PlaybackInformation, actual: PlaybackInformation): void;
+    protected expectMasterBarEqual(expected: MasterBar, actual: MasterBar): void;
+    protected expectSectionEqual(expected: Section | null, actual: Section | null): void;
+}

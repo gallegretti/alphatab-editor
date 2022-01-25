@@ -1,0 +1,497 @@
+import { LayoutMode } from '@src/LayoutMode';
+import { StaveProfile } from '@src/StaveProfile';
+import { AlphaTexImporter } from '@src/importer/AlphaTexImporter';
+import { Gp3To5Importer } from '@src/importer/Gp3To5Importer';
+import { Gp7Importer } from '@src/importer/Gp7Importer';
+import { GpxImporter } from '@src/importer/GpxImporter';
+import { MusicXmlImporter } from '@src/importer/MusicXmlImporter';
+import { HarmonicType } from '@src/model/HarmonicType';
+import { AlphaSynthWebWorker } from '@src/platform/javascript/AlphaSynthWebWorker';
+import { AlphaTabWebWorker } from '@src/platform/javascript/AlphaTabWebWorker';
+import { Html5Canvas } from '@src/platform/javascript/Html5Canvas';
+import { JQueryAlphaTab } from '@src/platform/javascript/JQueryAlphaTab';
+import { CssFontSvgCanvas } from '@src/platform/svg/CssFontSvgCanvas';
+import { EffectBarRendererFactory } from '@src/rendering/EffectBarRendererFactory';
+import { AlternateEndingsEffectInfo } from '@src/rendering/effects/AlternateEndingsEffectInfo';
+import { CapoEffectInfo } from '@src/rendering/effects/CapoEffectInfo';
+import { ChordsEffectInfo } from '@src/rendering/effects/ChordsEffectInfo';
+import { CrescendoEffectInfo } from '@src/rendering/effects/CrescendoEffectInfo';
+import { DynamicsEffectInfo } from '@src/rendering/effects/DynamicsEffectInfo';
+import { FadeInEffectInfo } from '@src/rendering/effects/FadeInEffectInfo';
+import { FermataEffectInfo } from '@src/rendering/effects/FermataEffectInfo';
+import { FingeringEffectInfo } from '@src/rendering/effects/FingeringEffectInfo';
+import { HarmonicsEffectInfo } from '@src/rendering/effects/HarmonicsEffectInfo';
+import { LetRingEffectInfo } from '@src/rendering/effects/LetRingEffectInfo';
+import { LyricsEffectInfo } from '@src/rendering/effects/LyricsEffectInfo';
+import { MarkerEffectInfo } from '@src/rendering/effects/MarkerEffectInfo';
+import { OttaviaEffectInfo } from '@src/rendering/effects/OttaviaEffectInfo';
+import { PalmMuteEffectInfo } from '@src/rendering/effects/PalmMuteEffectInfo';
+import { PickSlideEffectInfo } from '@src/rendering/effects/PickSlideEffectInfo';
+import { PickStrokeEffectInfo } from '@src/rendering/effects/PickStrokeEffectInfo';
+import { SlightBeatVibratoEffectInfo } from '@src/rendering/effects/SlightBeatVibratoEffectInfo';
+import { SlightNoteVibratoEffectInfo } from '@src/rendering/effects/SlightNoteVibratoEffectInfo';
+import { TapEffectInfo } from '@src/rendering/effects/TapEffectInfo';
+import { TempoEffectInfo } from '@src/rendering/effects/TempoEffectInfo';
+import { TextEffectInfo } from '@src/rendering/effects/TextEffectInfo';
+import { TrillEffectInfo } from '@src/rendering/effects/TrillEffectInfo';
+import { TripletFeelEffectInfo } from '@src/rendering/effects/TripletFeelEffectInfo';
+import { WhammyBarEffectInfo } from '@src/rendering/effects/WhammyBarEffectInfo';
+import { WideBeatVibratoEffectInfo } from '@src/rendering/effects/WideBeatVibratoEffectInfo';
+import { WideNoteVibratoEffectInfo } from '@src/rendering/effects/WideNoteVibratoEffectInfo';
+import { HorizontalScreenLayout } from '@src/rendering/layout/HorizontalScreenLayout';
+import { PageViewLayout } from '@src/rendering/layout/PageViewLayout';
+import { ScoreBarRendererFactory } from '@src/rendering/ScoreBarRendererFactory';
+import { TabBarRendererFactory } from '@src/rendering/TabBarRendererFactory';
+import { FontLoadingChecker } from '@src/util/FontLoadingChecker';
+import { Logger } from '@src/Logger';
+import { LeftHandTapEffectInfo } from './rendering/effects/LeftHandTapEffectInfo';
+import { CapellaImporter } from './importer/CapellaImporter';
+import { ResizeObserverPolyfill } from './platform/javascript/ResizeObserverPolyfill';
+import { WebPlatform } from './platform/javascript/WebPlatform';
+import { IntersectionObserverPolyfill } from './platform/javascript/IntersectionObserverPolyfill';
+import { AlphaSynthWebWorklet } from './platform/javascript/AlphaSynthAudioWorkletOutput';
+export class LayoutEngineFactory {
+    constructor(vertical, createLayout) {
+        this.vertical = vertical;
+        this.createLayout = createLayout;
+    }
+}
+export class RenderEngineFactory {
+    constructor(supportsWorkers, canvas) {
+        this.supportsWorkers = supportsWorkers;
+        this.createCanvas = canvas;
+    }
+}
+/**
+ * This public class represents the global alphaTab environment where
+ * alphaTab looks for information like available layout engines
+ * staves etc.
+ * This public class represents the global alphaTab environment where
+ * alphaTab looks for information like available layout engines
+ * staves etc.
+ * @partial
+ */
+export class Environment {
+    /**
+     * @target web
+     */
+    static createStyleElement(elementDocument, fontDirectory) {
+        let styleElement = elementDocument.getElementById('alphaTabStyle');
+        if (!styleElement) {
+            if (!fontDirectory) {
+                Logger.error('AlphaTab', 'Font directory could not be detected, cannot create style element');
+                return;
+            }
+            styleElement = elementDocument.createElement('style');
+            styleElement.id = 'alphaTabStyle';
+            let css = `
+            @font-face {
+                font-family: 'alphaTab';
+                 src: url('${fontDirectory}Bravura.eot');
+                 src: url('${fontDirectory}Bravura.eot?#iefix') format('embedded-opentype')
+                      , url('${fontDirectory}Bravura.woff') format('woff')
+                      , url('${fontDirectory}Bravura.otf') format('opentype')
+                      , url('${fontDirectory}Bravura.svg#Bravura') format('svg');
+                 font-weight: normal;
+                 font-style: normal;
+            }
+            .at-surface * {
+                cursor: default;
+                vertical-align: top;
+                overflow: visible;
+            }
+            .at-surface-svg text {
+                dominant-baseline: central;
+            }             
+            .at {
+                 font-family: 'alphaTab';
+                 speak: none;
+                 font-style: normal;
+                 font-weight: normal;
+                 font-variant: normal;
+                 text-transform: none;
+                 line-height: 1;
+                 line-height: 1;
+                 -webkit-font-smoothing: antialiased;
+                 -moz-osx-font-smoothing: grayscale;
+                 font-size: ${Environment.MusicFontSize}px;
+                 overflow: visible !important;
+            }`;
+            styleElement.innerHTML = css;
+            elementDocument.getElementsByTagName('head').item(0).appendChild(styleElement);
+            Environment.bravuraFontChecker.checkForFontAvailability();
+        }
+    }
+    /**
+     * @target web
+     */
+    static get globalThis() {
+        if (Environment._globalThis === undefined) {
+            try {
+                Environment._globalThis = globalThis;
+            }
+            catch (e) {
+                // globalThis not available
+            }
+            if (typeof Environment._globalThis === 'undefined') {
+                Environment._globalThis = self;
+            }
+            if (typeof Environment._globalThis === 'undefined') {
+                Environment._globalThis = global;
+            }
+            if (typeof Environment._globalThis === 'undefined') {
+                Environment._globalThis = window;
+            }
+            if (typeof Environment._globalThis === 'undefined') {
+                Environment._globalThis = Function('return this')();
+            }
+        }
+        return this._globalThis;
+    }
+    /**
+     * @target web
+     */
+    static get isRunningInWorker() {
+        return 'WorkerGlobalScope' in Environment.globalThis;
+    }
+    /**
+     * @target web
+     */
+    static get isRunningInAudioWorklet() {
+        return 'AudioWorkletGlobalScope' in Environment.globalThis;
+    }
+    /**
+     * @target web
+     */
+    static createAlphaTabWorker(scriptFile) {
+        if (Environment.webPlatform === WebPlatform.BrowserModule) {
+            let script = `import * as alphaTab from '${scriptFile}'`;
+            let blob = new Blob([script], { type: 'text/javascript' });
+            return new Worker(URL.createObjectURL(blob), { type: 'module' });
+        }
+        else {
+            let script = `importScripts('${scriptFile}')`;
+            let blob = new Blob([script]);
+            return new Worker(URL.createObjectURL(blob));
+        }
+    }
+    /**
+     * @target web
+     * @partial
+     */
+    static throttle(action, delay) {
+        let timeoutId = 0;
+        return () => {
+            Environment.globalThis.clearTimeout(timeoutId);
+            timeoutId = Environment.globalThis.setTimeout(action, delay);
+        };
+    }
+    /**
+     * @target web
+     */
+    static detectScriptFile() {
+        // normal browser include as <script>
+        if ('document' in Environment.globalThis && document.currentScript) {
+            return document.currentScript.src;
+        }
+        // browser include as ES6 import
+        // <script type="module">
+        // import * as alphaTab from 'dist/alphaTab.js';
+        try {
+            // @ts-ignore
+            const meta = import.meta;
+            if ('url' in meta) {
+                return meta.url;
+            }
+        }
+        catch (e) {
+            // ignore potential errors
+        }
+        return null;
+    }
+    /**
+     * @target web
+     */
+    static registerJQueryPlugin() {
+        if (!Environment.isRunningInWorker && Environment.globalThis && 'jQuery' in Environment.globalThis) {
+            let jquery = Environment.globalThis['jQuery'];
+            let api = new JQueryAlphaTab();
+            jquery.fn.alphaTab = function (method) {
+                const args = Array.prototype.slice.call(arguments, 1);
+                // if only a single element is affected, we use this
+                if (this.length === 1) {
+                    return api.exec(this[0], method, args);
+                }
+                // if multiple elements are affected we provide chaining
+                return this.each((_i, e) => {
+                    api.exec(e, method, args);
+                });
+            };
+            jquery.alphaTab = {
+                restore: JQueryAlphaTab.restore
+            };
+            jquery.fn.alphaTab.fn = api;
+        }
+    }
+    static getRenderEngineFactory(engine) {
+        if (!engine || !Environment.renderEngines.has(engine)) {
+            return Environment.renderEngines.get('default');
+        }
+        return Environment.renderEngines.get(engine);
+    }
+    static getLayoutEngineFactory(layoutMode) {
+        if (!layoutMode || !Environment.layoutEngines.has(layoutMode)) {
+            return Environment.layoutEngines.get(LayoutMode.Page);
+        }
+        return Environment.layoutEngines.get(layoutMode);
+    }
+    /**
+     * Gets all default ScoreImporters
+     * @returns
+     */
+    static buildImporters() {
+        return [
+            new Gp3To5Importer(),
+            new GpxImporter(),
+            new Gp7Importer(),
+            new MusicXmlImporter(),
+            new CapellaImporter(),
+            new AlphaTexImporter()
+        ];
+    }
+    static createDefaultRenderEngines() {
+        const renderEngines = new Map();
+        renderEngines.set('svg', new RenderEngineFactory(true, () => {
+            return new CssFontSvgCanvas();
+        }));
+        renderEngines.set('default', renderEngines.get('svg'));
+        Environment.createPlatformSpecificRenderEngines(renderEngines);
+        return renderEngines;
+    }
+    /**
+     * @target web
+     * @partial
+     */
+    static createPlatformSpecificRenderEngines(renderEngines) {
+        renderEngines.set('html5', new RenderEngineFactory(false, () => {
+            return new Html5Canvas();
+        }));
+    }
+    static createDefaultStaveProfiles() {
+        const staveProfiles = new Map();
+        // default combinations of stave textprofiles
+        staveProfiles.set(StaveProfile.ScoreTab, [
+            new EffectBarRendererFactory('score-effects', [
+                new TempoEffectInfo(),
+                new TripletFeelEffectInfo(),
+                new MarkerEffectInfo(),
+                new TextEffectInfo(),
+                new ChordsEffectInfo(),
+                new FermataEffectInfo(),
+                new WhammyBarEffectInfo(),
+                new TrillEffectInfo(),
+                new OttaviaEffectInfo(true),
+                new WideBeatVibratoEffectInfo(),
+                new SlightBeatVibratoEffectInfo(),
+                new WideNoteVibratoEffectInfo(),
+                new SlightNoteVibratoEffectInfo(),
+                new LeftHandTapEffectInfo(),
+                new AlternateEndingsEffectInfo()
+            ]),
+            new ScoreBarRendererFactory(),
+            new EffectBarRendererFactory('tab-effects', [
+                new CrescendoEffectInfo(),
+                new OttaviaEffectInfo(false),
+                new DynamicsEffectInfo(),
+                new LyricsEffectInfo(),
+                new TrillEffectInfo(),
+                new WideBeatVibratoEffectInfo(),
+                new SlightBeatVibratoEffectInfo(),
+                new WideNoteVibratoEffectInfo(),
+                new SlightNoteVibratoEffectInfo(),
+                new TapEffectInfo(),
+                new FadeInEffectInfo(),
+                new HarmonicsEffectInfo(HarmonicType.Natural),
+                new HarmonicsEffectInfo(HarmonicType.Artificial),
+                new HarmonicsEffectInfo(HarmonicType.Pinch),
+                new HarmonicsEffectInfo(HarmonicType.Tap),
+                new HarmonicsEffectInfo(HarmonicType.Semi),
+                new HarmonicsEffectInfo(HarmonicType.Feedback),
+                new LetRingEffectInfo(),
+                new CapoEffectInfo(),
+                new FingeringEffectInfo(),
+                new PalmMuteEffectInfo(),
+                new PickStrokeEffectInfo(),
+                new PickSlideEffectInfo(),
+                new LeftHandTapEffectInfo()
+            ]),
+            new TabBarRendererFactory(false, false, false)
+        ]);
+        staveProfiles.set(StaveProfile.Score, [
+            new EffectBarRendererFactory('score-effects', [
+                new TempoEffectInfo(),
+                new TripletFeelEffectInfo(),
+                new MarkerEffectInfo(),
+                new TextEffectInfo(),
+                new ChordsEffectInfo(),
+                new FermataEffectInfo(),
+                new WhammyBarEffectInfo(),
+                new TrillEffectInfo(),
+                new OttaviaEffectInfo(true),
+                new WideBeatVibratoEffectInfo(),
+                new SlightBeatVibratoEffectInfo(),
+                new WideNoteVibratoEffectInfo(),
+                new SlightNoteVibratoEffectInfo(),
+                new FadeInEffectInfo(),
+                new LetRingEffectInfo(),
+                new PalmMuteEffectInfo(),
+                new PickStrokeEffectInfo(),
+                new PickSlideEffectInfo(),
+                new LeftHandTapEffectInfo(),
+                new AlternateEndingsEffectInfo()
+            ]),
+            new ScoreBarRendererFactory(),
+            new EffectBarRendererFactory('score-bottom-effects', [
+                new CrescendoEffectInfo(),
+                new OttaviaEffectInfo(false),
+                new DynamicsEffectInfo(),
+                new LyricsEffectInfo()
+            ])
+        ]);
+        let tabEffectInfos = [
+            new TempoEffectInfo(),
+            new TripletFeelEffectInfo(),
+            new MarkerEffectInfo(),
+            new TextEffectInfo(),
+            new ChordsEffectInfo(),
+            new FermataEffectInfo(),
+            new TrillEffectInfo(),
+            new WideBeatVibratoEffectInfo(),
+            new SlightBeatVibratoEffectInfo(),
+            new WideNoteVibratoEffectInfo(),
+            new SlightNoteVibratoEffectInfo(),
+            new TapEffectInfo(),
+            new FadeInEffectInfo(),
+            new HarmonicsEffectInfo(HarmonicType.Artificial),
+            new HarmonicsEffectInfo(HarmonicType.Pinch),
+            new HarmonicsEffectInfo(HarmonicType.Tap),
+            new HarmonicsEffectInfo(HarmonicType.Semi),
+            new HarmonicsEffectInfo(HarmonicType.Feedback),
+            new LetRingEffectInfo(),
+            new CapoEffectInfo(),
+            new FingeringEffectInfo(),
+            new PalmMuteEffectInfo(),
+            new PickStrokeEffectInfo(),
+            new PickSlideEffectInfo(),
+            new LeftHandTapEffectInfo(),
+            new AlternateEndingsEffectInfo()
+        ];
+        staveProfiles.set(StaveProfile.Tab, [
+            new EffectBarRendererFactory('tab-effects', tabEffectInfos),
+            new TabBarRendererFactory(true, true, true),
+            new EffectBarRendererFactory('tab-bottom-effects', [new LyricsEffectInfo()])
+        ]);
+        staveProfiles.set(StaveProfile.TabMixed, [
+            new EffectBarRendererFactory('tab-effects', tabEffectInfos),
+            new TabBarRendererFactory(false, false, false),
+            new EffectBarRendererFactory('tab-bottom-effects', [new LyricsEffectInfo()])
+        ]);
+        return staveProfiles;
+    }
+    static createDefaultLayoutEngines() {
+        const engines = new Map();
+        // default layout engines
+        engines.set(LayoutMode.Page, new LayoutEngineFactory(true, r => {
+            return new PageViewLayout(r);
+        }));
+        engines.set(LayoutMode.Horizontal, new LayoutEngineFactory(false, r => {
+            return new HorizontalScreenLayout(r);
+        }));
+        return engines;
+    }
+    /**
+     * @target web
+     * @partial
+     */
+    static platformInit() {
+        if (Environment.isRunningInAudioWorklet) {
+            AlphaSynthWebWorklet.init();
+        }
+        else if (Environment.isRunningInWorker) {
+            AlphaTabWebWorker.init();
+            AlphaSynthWebWorker.init();
+        }
+        else if (Environment.webPlatform === WebPlatform.Browser ||
+            Environment.webPlatform === WebPlatform.BrowserModule) {
+            Environment.registerJQueryPlugin();
+            Environment.HighDpiFactor = window.devicePixelRatio;
+            // ResizeObserver API does not yet exist so long on Safari (only start 2020 with iOS Safari 13.7 and Desktop 13.1)
+            // so we better add a polyfill for it
+            if (!('ResizeObserver' in Environment.globalThis)) {
+                Environment.globalThis.ResizeObserver = ResizeObserverPolyfill;
+            }
+            // IntersectionObserver API does not on older iOS versions
+            // so we better add a polyfill for it
+            if (!('IntersectionObserver' in Environment.globalThis)) {
+                Environment.globalThis.IntersectionObserver = IntersectionObserverPolyfill;
+            }
+        }
+    }
+    /**
+     * @target web
+     */
+    static detectWebPlatform() {
+        try {
+            // Credit of the node.js detection goes to
+            // https://github.com/iliakan/detect-node
+            // MIT License
+            // Copyright (c) 2017 Ilya Kantor
+            // tslint:disable-next-line: strict-type-predicates
+            if (Object.prototype.toString.call(typeof process !== 'undefined' ? process : 0) === '[object process]') {
+                return WebPlatform.NodeJs;
+            }
+        }
+        catch (e) {
+            // no node.js
+        }
+        try {
+            // @ts-ignore
+            if ('url' in import.meta) {
+                return WebPlatform.BrowserModule;
+            }
+        }
+        catch (e) {
+            // no browser module
+        }
+        return WebPlatform.Browser;
+    }
+}
+/**
+ * The font size of the music font in pixel.
+ */
+Environment.MusicFontSize = 34;
+/**
+ * The scaling factor to use when rending raster graphics for sharper rendering on high-dpi displays.
+ */
+Environment.HighDpiFactor = 1;
+/**
+ * @target web
+ */
+Environment._globalThis = undefined;
+/**
+ * @target web
+ */
+Environment.webPlatform = Environment.detectWebPlatform();
+/**
+ * @target web
+ */
+Environment.scriptFile = Environment.detectScriptFile();
+/**
+ * @target web
+ */
+Environment.bravuraFontChecker = new FontLoadingChecker('alphaTab');
+Environment.renderEngines = Environment.createDefaultRenderEngines();
+Environment.layoutEngines = Environment.createDefaultLayoutEngines();
+Environment.staveProfiles = Environment.createDefaultStaveProfiles();
+Environment.platformInit();
+//# sourceMappingURL=Environment.js.map

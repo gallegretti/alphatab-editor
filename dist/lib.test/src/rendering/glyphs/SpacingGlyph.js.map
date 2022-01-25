@@ -1,0 +1,1 @@
+{"version":3,"file":"SpacingGlyph.js","sourceRoot":"","sources":["../../../../../src/rendering/glyphs/SpacingGlyph.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,KAAK,EAAE,MAAM,6BAA6B,CAAC;AAEpD;;GAEG;AACH,MAAM,OAAO,YAAa,SAAQ,KAAK;IACnC,YAAmB,CAAS,EAAE,CAAS,EAAE,KAAa;QAClD,KAAK,CAAC,CAAC,EAAE,CAAC,CAAC,CAAC;QACZ,IAAI,CAAC,KAAK,GAAG,KAAK,CAAC;IACvB,CAAC;CACJ"}

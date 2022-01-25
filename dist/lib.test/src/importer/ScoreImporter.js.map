@@ -1,0 +1,1 @@
+{"version":3,"file":"ScoreImporter.js","sourceRoot":"","sources":["../../../../src/importer/ScoreImporter.ts"],"names":[],"mappings":"AAIA;;;GAGG;AACH,MAAM,OAAgB,aAAa;IAI/B;;OAEG;IACI,IAAI,CAAC,IAAe,EAAE,QAAkB;QAC3C,IAAI,CAAC,IAAI,GAAG,IAAI,CAAC;QACjB,IAAI,CAAC,QAAQ,GAAG,QAAQ,CAAC;IAC7B,CAAC;CASJ"}

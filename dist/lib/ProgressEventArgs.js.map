@@ -1,0 +1,1 @@
+{"version":3,"file":"ProgressEventArgs.js","sourceRoot":"","sources":["../../src/ProgressEventArgs.ts"],"names":[],"mappings":"AAAA;;GAEG;AACH,MAAM,OAAO,iBAAiB;IAW1B;;;;OAIG;IACH,YAAmB,MAAc,EAAE,KAAa;QAC5C,IAAI,CAAC,MAAM,GAAG,MAAM,CAAC;QACrB,IAAI,CAAC,KAAK,GAAG,KAAK,CAAC;IACvB,CAAC;CACJ"}

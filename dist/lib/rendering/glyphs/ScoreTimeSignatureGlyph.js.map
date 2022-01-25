@@ -1,0 +1,1 @@
+{"version":3,"file":"ScoreTimeSignatureGlyph.js","sourceRoot":"","sources":["../../../../src/rendering/glyphs/ScoreTimeSignatureGlyph.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,kBAAkB,EAAE,MAAM,0CAA0C,CAAC;AAE9E,MAAM,OAAO,uBAAwB,SAAQ,kBAAkB;IAC3D,IAAc,WAAW;QACrB,OAAO,CAAC,CAAC;IACb,CAAC;IAED,IAAc,WAAW;QACrB,OAAO,CAAC,CAAC;IACb,CAAC;CACJ"}

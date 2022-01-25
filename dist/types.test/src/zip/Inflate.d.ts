@@ -1,0 +1,37 @@
+import { IReadable } from '@src/io/IReadable';
+export declare class Inflate {
+    private static LenExtraBitsTbl;
+    private static LenBaseValTbl;
+    private static DistExtraBitsTbl;
+    private static DistBaseValTbl;
+    private static CodeLengthsPos;
+    private static _fixedHuffman;
+    private static buildFixedHuffman;
+    private _nbits;
+    private _bits;
+    private _state;
+    private _isFinal;
+    private _huffman;
+    private _huffdist;
+    private _len;
+    private _dist;
+    private _needed;
+    private _output;
+    private _outpos;
+    private _input;
+    private _lengths;
+    private _window;
+    constructor(readable: IReadable);
+    readBytes(b: Uint8Array, pos: number, len: number): number;
+    private inflateLoop;
+    private addDistOne;
+    private addByte;
+    private addDist;
+    private getBit;
+    private getBits;
+    private getRevBits;
+    private resetBits;
+    private addBytes;
+    private inflateLengths;
+    private applyHuffman;
+}
