@@ -118,17 +118,12 @@ class SelectedNoteController {
     }
 
     redrawOverlay() {
-        try {
-            // TODO: note bounds is stale, needs to be fetched again
-            if (!this.currentSelectedNote.note) {
-                selectedNoteOverlay.drawSelectedNote(null);
-                return;
-            }
-            const newBounds = this.renderer.boundsLookup.getNoteBounds(this.currentSelectedNote.note);
-            selectedNoteOverlay.drawSelectedNote(newBounds.noteHeadBounds);
-        } catch (e) {
-            console.error(e);
+        if (!this.currentSelectedNote.note) {
+            selectedNoteOverlay.drawSelectedNote(null);
+            return;
         }
+        const newBounds = this.renderer.boundsLookup.getNoteBounds(this.currentSelectedNote.note);
+        selectedNoteOverlay.drawSelectedNote(newBounds.noteHeadBounds);
     }
 }
 
