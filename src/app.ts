@@ -14,8 +14,8 @@ const selectedNoteController = new SelectedNoteController(at.renderer);
 function onEditorUIEvent(UIevent: EditorUIEvent) {
     console.log(UIevent);
     if (UIevent.type === 'string-mouse-down') {
-        // addNoteOnClick(UIevent.data.beat, UIevent.data.stringNumber);
-        // at.render();
+        addNoteOnClick(UIevent.data.beat, UIevent.data.stringNumber);
+        at.render();
     }
     if (UIevent.type === 'note-mouse-down') {
         selectedNoteController.toggleNoteSelection(UIevent.data);
@@ -83,10 +83,15 @@ function removeNote(note: Note) {
 }
 
 function addNoteOnClick(beat: Beat, stringNumber: number) {
+    const hasNoteOnString = beat.notes.includes((note: Note) => note.string === stringNumber);
+    if (hasNoteOnString) {
+        // Do not add an existing note
+        return;
+    }
     const note = new alphaTab.model.Note() as Note;
     note.fret = 0;
     note.string = stringNumber;
     beat.addNote(note);
-    beat.finish({});
+    beat.finish(null);
     return note;
 }
