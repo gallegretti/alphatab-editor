@@ -1,9 +1,13 @@
 import selectedNoteOverlay from './selected-note-overlay';
 import { NoteAndBounds } from './editor-ui-event';
+import { ScoreRenderer } from "../dist/types/rendering/ScoreRenderer";
 
 const at = (window as any).at;
 
 class SelectedNoteController {
+
+    constructor(private renderer: ScoreRenderer) {
+    }
 
     currentSelectedNote: NoteAndBounds = null;
     toggleNoteSelection(data: NoteAndBounds) {
@@ -82,7 +86,7 @@ class SelectedNoteController {
         if (!nextNote) {
             return;
         }
-        const newNoteData = at.renderer.boundsLookup.getNoteBounds(nextNote);
+        const newNoteData = this.renderer.boundsLookup.getNoteBounds(nextNote);
         this.setSelectedNote({
             note: newNoteData.note,
             noteBounds: newNoteData.noteHeadBounds,
@@ -92,6 +96,7 @@ class SelectedNoteController {
     }
 
     moveSelectedNoteHorizontal(getBeat) {
+        console.log('moveSelectedNoteHorizontal');
         const note = this.currentSelectedNote.note;
         if (!note) {
             return;
@@ -114,9 +119,19 @@ class SelectedNoteController {
     }
 
     redrawOverlay() {
-        // TODO: note bounds is stale, needs to be fetched again
-        selectedNoteOverlay.drawSelectedNote(this.currentSelectedNote.noteBounds);
+        try {
+            // TODO: note bounds is stale, needs to be fetched again
+            if (!this.currentSelectedNote.note) {
+                selectedNoteOverlay.drawSelectedNote(null);
+                return;
+            }
+            const newBounds = this.renderer.boundsLookup.getNoteBounds(this.currentSelectedNote.note);
+            console.log('newBounds', newBounds);
+            selectedNoteOverlay.drawSelectedNote(newBounds.noteHeadBounds);
+        } catch (e) {
+            console.error(e);
+        }
     }
 }
 
-export default new SelectedNoteController();
+export default SelectedNoteController;

@@ -1,4 +1,4 @@
-import selectedNoteController from './selected-note-controller';
+import SelectedNoteController from './selected-note-controller';
 import createEventEmitter from './event-emitter';
 import { Note } from '../dist/types/model/Note';
 import { Beat } from '../dist/types/model/Beat';
@@ -8,6 +8,8 @@ createEventEmitter(onEditorUIEvent);
 
 const at = (window as any).at;
 const alphaTab = (window as any).alphaTab;
+
+const selectedNoteController = new SelectedNoteController(at.renderer);
 
 function onEditorUIEvent(UIevent: EditorUIEvent) {
     console.log(UIevent);
@@ -32,7 +34,11 @@ function onEditorUIEvent(UIevent: EditorUIEvent) {
         }
     }
     if (UIevent.type === 'render-finished') {
-        selectedNoteController.redrawOverlay();
+        // TODO: It looks like alphaTab will emit the render finished event before it finishes updating the boundsLookup.
+        // Needs to investigate if that's the case or something else, and how to remove this timeout
+        setTimeout(() => {
+            selectedNoteController.redrawOverlay();
+        }, 50);
     }
     if (UIevent.type === 'move-cursor-right' && selectedNoteController.hasSelectedNote()) {
         UIevent.rawEvent.preventDefault();
@@ -55,7 +61,6 @@ function onEditorUIEvent(UIevent: EditorUIEvent) {
         selectedNoteController.setSelectedNote(null);
     }
 }
-
 
 function newFretFromInput(newInput: number) {
     const currentNote = selectedNoteController.getSelectedNote().note;
