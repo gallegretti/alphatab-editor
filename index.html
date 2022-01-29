@@ -9,11 +9,6 @@
   </head>
   <body>
     <div class="at-wrap">
-      <div class="at-overlay">
-        <div class="at-overlay-content">
-          Music sheet is loading
-        </div>
-      </div>
       <div class="at-content">
         <div class="at-sidebar">
           Track selector will go here
@@ -40,15 +35,6 @@
       };
       const api = new alphaTab.AlphaTabApi(main, settings);
       window.at = api;
-
-      // overlay logic
-      const overlay = wrapper.querySelector(".at-overlay");
-      api.renderStarted.on(() => {
-        overlay.style.display = "flex";
-      });
-      api.renderFinished.on(() => {
-        overlay.style.display = "none";
-      });
     </script>
     <script src="./dist/bundle.js"></script>
   </body>

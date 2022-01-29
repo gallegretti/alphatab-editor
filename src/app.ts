@@ -1,26 +1,29 @@
 import selectedNoteController from './selected-note-controller';
 import createEventEmitter from './event-emitter';
+import { Note } from '../dist/types/model/Note';
+import { Beat } from '../dist/types/model/Beat';
+import { EditorUIEvent } from './editor-ui-event';
 
-createEventEmitter(onEvent);
+createEventEmitter(onEditorUIEvent);
 
 const at = (window as any).at;
 const alphaTab = (window as any).alphaTab;
 
-function onEvent(event) {
-    console.log(event);
-    if (event.type === 'string-mouse-down') {
-        addNoteOnClick(event.data.beat, event.data.stringNumber);
+function onEditorUIEvent(UIevent: EditorUIEvent) {
+    console.log(UIevent);
+    if (UIevent.type === 'string-mouse-down') {
+        // addNoteOnClick(UIevent.data.beat, UIevent.data.stringNumber);
+        // at.render();
+    }
+    if (UIevent.type === 'note-mouse-down') {
+        selectedNoteController.toggleNoteSelection(UIevent.data);
+    }
+    if (UIevent.type === 'number-pressed' && selectedNoteController.hasSelectedNote()) {
+        UIevent.rawEvent.preventDefault();
+        newFretFromInput(UIevent.data.number);
         at.render();
     }
-    if (event.type === 'note-mouse-down') {
-        selectedNoteController.toggleNoteSelection(event.data);
-    }
-    if (event.type === 'number-pressed' && selectedNoteController.hasSelectedNote()) {
-        event.rawEvent.preventDefault();
-        newFretFromInput(event.data.number);
-        at.render();
-    }
-    if (event.type === 'delete-selected-note') {
+    if (UIevent.type === 'delete-selected-note') {
         const currentSelectedNote = selectedNoteController.getSelectedNote();
         if (currentSelectedNote) {
             removeNote(currentSelectedNote.note);
@@ -28,33 +31,33 @@ function onEvent(event) {
             at.render();
         }
     }
-    if (event.type === 'render-finished') {
+    if (UIevent.type === 'render-finished') {
         selectedNoteController.redrawOverlay();
     }
-    if (event.type === 'move-cursor-right' && selectedNoteController.hasSelectedNote()) {
-        event.rawEvent.preventDefault();
+    if (UIevent.type === 'move-cursor-right' && selectedNoteController.hasSelectedNote()) {
+        UIevent.rawEvent.preventDefault();
         selectedNoteController.moveSelectedNoteRight();
     }
-    if (event.type === 'move-cursor-left' && selectedNoteController.hasSelectedNote()) {
-        event.rawEvent.preventDefault();
+    if (UIevent.type === 'move-cursor-left' && selectedNoteController.hasSelectedNote()) {
+        UIevent.rawEvent.preventDefault();
         selectedNoteController.moveSelectedNoteLeft();
     }
-    if (event.type === 'move-cursor-up' && selectedNoteController.hasSelectedNote()) {
-        event.rawEvent.preventDefault();
+    if (UIevent.type === 'move-cursor-up' && selectedNoteController.hasSelectedNote()) {
+        UIevent.rawEvent.preventDefault();
         selectedNoteController.moveSelectedNoteUp();
     }
-    if (event.type === 'move-cursor-down' && selectedNoteController.hasSelectedNote()) {
-        event.rawEvent.preventDefault();
+    if (UIevent.type === 'move-cursor-down' && selectedNoteController.hasSelectedNote()) {
+        UIevent.rawEvent.preventDefault();
         selectedNoteController.moveSelectedNoteDown();
     }
-    if (event.type === 'deselect-cursor' && selectedNoteController.hasSelectedNote()) {
-        event.rawEvent.preventDefault();
+    if (UIevent.type === 'deselect-cursor' && selectedNoteController.hasSelectedNote()) {
+        UIevent.rawEvent.preventDefault();
         selectedNoteController.setSelectedNote(null);
     }
 }
 
 
-function newFretFromInput(newInput) {
+function newFretFromInput(newInput: number) {
     const currentNote = selectedNoteController.getSelectedNote().note;
     const currentFret = currentNote.fret;
     let newFret;
@@ -70,15 +73,15 @@ function newFretFromInput(newInput) {
 }
 
 
-function removeNote(note) {
+function removeNote(note: Note) {
     note.beat.removeNote(note);
 }
 
-function addNoteOnClick(beat, stringNumber) {
-    const note = new alphaTab.model.Note();
+function addNoteOnClick(beat: Beat, stringNumber: number) {
+    const note = new alphaTab.model.Note() as Note;
     note.fret = 0;
     note.string = stringNumber;
     beat.addNote(note);
-    beat.finish();
+    beat.finish({});
     return note;
 }

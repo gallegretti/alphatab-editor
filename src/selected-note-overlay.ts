@@ -1,5 +1,7 @@
+import { Bounds } from "../dist/types/rendering/utils/Bounds"
+
 class SelectedNoteOverlay {
-    drawSelectedNote(bounds) {
+    drawSelectedNote(bounds: Bounds) {
         const selectedNoteElementId = 'selected-note';
         const currentSelection = document.getElementById(selectedNoteElementId);
         if (currentSelection) {

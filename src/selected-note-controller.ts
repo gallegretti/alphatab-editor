@@ -1,11 +1,12 @@
 import selectedNoteOverlay from './selected-note-overlay';
+import { NoteAndBounds } from './editor-ui-event';
 
 const at = (window as any).at;
 
 class SelectedNoteController {
 
-    currentSelectedNote = null;
-    toggleNoteSelection(data) {
+    currentSelectedNote: NoteAndBounds = null;
+    toggleNoteSelection(data: NoteAndBounds) {
         if (this.currentSelectedNote?.note?.id === data?.note?.id) {
             this.currentSelectedNote = null;
             selectedNoteOverlay.drawSelectedNote(null);
@@ -114,7 +115,7 @@ class SelectedNoteController {
 
     redrawOverlay() {
         // TODO: note bounds is stale, needs to be fetched again
-        selectedNoteOverlay.drawSelectedNote(this.currentSelectedNote?.noteBounds);
+        selectedNoteOverlay.drawSelectedNote(this.currentSelectedNote.noteBounds);
     }
 }
 

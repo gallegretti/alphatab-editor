@@ -1,12 +1,15 @@
+import { EditorUIEvent } from "./editor-ui-event";
+import { Bounds } from "../dist/types/rendering/utils/Bounds";
+
 const callbacks = [];
 
 const at = (window as any).at;
 
-function emitEvent(event) {
+function emitEvent(event: EditorUIEvent) {
     callbacks.forEach((callback) => callback(event));
 }
 
-function getStringNumber(y, barBounds) {
+function getStringNumber(y: number, barBounds: Bounds) {
     // TODO: Add padding around first and last frets
     const fretH = barBounds.h / 6;
     if (y > barBounds.y && y < barBounds.y + fretH * 1) {
