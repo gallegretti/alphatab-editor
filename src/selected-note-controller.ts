@@ -1,23 +1,22 @@
 import selectedNoteOverlay from './selected-note-overlay';
-import { NoteAndBounds } from './editor-ui-event';
 import { ScoreRenderer } from "../dist/types/rendering/ScoreRenderer";
-
-const at = (window as any).at;
+import { Note } from '../dist/types/model/Note';
+import { Beat } from '../dist/types/model/Beat';
 
 class SelectedNoteController {
+
+    private currentSelectedNote: Note = null;
 
     constructor(private renderer: ScoreRenderer) {
     }
 
-    currentSelectedNote: NoteAndBounds = null;
-    toggleNoteSelection(data: NoteAndBounds) {
-        if (this.currentSelectedNote?.note?.id === data?.note?.id) {
+    toggleNoteSelection(data: Note) {
+        if (this.currentSelectedNote?.id === data?.id) {
             this.currentSelectedNote = null;
-            selectedNoteOverlay.drawSelectedNote(null);
         } else {
             this.currentSelectedNote = data;
-            selectedNoteOverlay.drawSelectedNote(data.noteBounds);
         }
+        this.redrawOverlay();
     }
 
     moveSelectedNoteLeft() {
@@ -32,7 +31,7 @@ class SelectedNoteController {
         return this.moveSelectedNoteVertical((beatNotes) => {
             return beatNotes
                 .sort((a, b) => a.string - b.string)
-                .find((note) => note.string > this.currentSelectedNote.note.string);
+                .find((note) => note.string > this.currentSelectedNote.string);
         })
     }
 
@@ -40,27 +39,32 @@ class SelectedNoteController {
         return this.moveSelectedNoteVertical((beatNotes) => {
             return beatNotes
                 .sort((a, b) => b.string - a.string)
-                .find((note) => note.string < this.currentSelectedNote.note.string);
+                .find((note) => note.string < this.currentSelectedNote.string);
         });
     }
 
-    hasSelectedNote() {
+    hasSelectedNote(): boolean {
         return this.currentSelectedNote !== null;
     }
 
-    getSelectedNote() {
+    getSelectedNote(): Note {
         return this.currentSelectedNote;
     }
 
-    setSelectedNote(data) {
+    setSelectedNote(data: Note) {
         this.currentSelectedNote = data;
-        selectedNoteOverlay.drawSelectedNote(null);
     }
 
+    redrawOverlay() {
+        if (!this.currentSelectedNote) {
+            selectedNoteOverlay.drawSelectedNote(null);
+            return;
+        }
+        const newBounds = this.renderer.boundsLookup.getNoteBounds(this.currentSelectedNote);
+        selectedNoteOverlay.drawSelectedNote(newBounds.noteHeadBounds);
+    }
 
-    // Private
-
-    selectNextNote(currentNote, availableNotes) {
+    private selectNextNote(currentNote: Note, availableNotes: Note[]) {
         const newNote = availableNotes.find((newNote) => newNote.string === currentNote.string);
         if (newNote) {
             return newNote;
@@ -68,7 +72,7 @@ class SelectedNoteController {
         return availableNotes.find((newNote) => newNote.string < currentNote.string) ?? availableNotes.find((newNote) => newNote.string > currentNote.string);
     }
 
-    selectAvailableNotes(currentBeat, getBeat) {
+    private selectAvailableNotes(currentBeat: Beat, getBeat) {
         let beat = currentBeat;
         do {
             // Skip empty beats until the next beat with notes is found
@@ -77,26 +81,21 @@ class SelectedNoteController {
         return beat?.notes;
     }
 
-    moveSelectedNoteVertical(getNote) {
+    private moveSelectedNoteVertical(getNote: (notes: Note[]) => Note) {
         if (!this.currentSelectedNote) {
             return;
         }
-        const beatNotes = this.currentSelectedNote.note.beat.notes
+        const beatNotes = this.currentSelectedNote.beat.notes
         const nextNote = getNote(beatNotes)
         if (!nextNote) {
             return;
         }
-        const newNoteData = this.renderer.boundsLookup.getNoteBounds(nextNote);
-        this.setSelectedNote({
-            note: newNoteData.note,
-            noteBounds: newNoteData.noteHeadBounds,
-            beatBounds: newNoteData.beatBounds.visualBounds,
-        });
+        this.setSelectedNote(nextNote);
         this.redrawOverlay();
     }
 
-    moveSelectedNoteHorizontal(getBeat) {
-        const note = this.currentSelectedNote.note;
+    private moveSelectedNoteHorizontal(getBeat: (beat: Beat) => Beat) {
+        const note = this.currentSelectedNote;
         if (!note) {
             return;
         }
@@ -108,22 +107,8 @@ class SelectedNoteController {
         if (!newNote) {
             return;
         }
-        const newNoteData = at.renderer.boundsLookup.getNoteBounds(newNote);
-        this.setSelectedNote({
-            note: newNoteData.note,
-            noteBounds: newNoteData.noteHeadBounds,
-            beatBounds: newNoteData.beatBounds.visualBounds,
-        });
+        this.setSelectedNote(newNote);
         this.redrawOverlay();
-    }
-
-    redrawOverlay() {
-        if (!this.currentSelectedNote.note) {
-            selectedNoteOverlay.drawSelectedNote(null);
-            return;
-        }
-        const newBounds = this.renderer.boundsLookup.getNoteBounds(this.currentSelectedNote.note);
-        selectedNoteOverlay.drawSelectedNote(newBounds.noteHeadBounds);
     }
 }
 

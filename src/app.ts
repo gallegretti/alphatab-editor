@@ -18,7 +18,7 @@ function onEditorUIEvent(UIevent: EditorUIEvent) {
         at.render();
     }
     if (UIevent.type === 'note-mouse-down') {
-        selectedNoteController.toggleNoteSelection(UIevent.data);
+        selectedNoteController.toggleNoteSelection(UIevent.data.note);
     }
     if (UIevent.type === 'number-pressed' && selectedNoteController.hasSelectedNote()) {
         UIevent.rawEvent.preventDefault();
@@ -28,7 +28,7 @@ function onEditorUIEvent(UIevent: EditorUIEvent) {
     if (UIevent.type === 'delete-selected-note') {
         const currentSelectedNote = selectedNoteController.getSelectedNote();
         if (currentSelectedNote) {
-            removeNote(currentSelectedNote.note);
+            removeNote(currentSelectedNote);
             selectedNoteController.setSelectedNote(null);
             at.render();
         }
@@ -63,7 +63,7 @@ function onEditorUIEvent(UIevent: EditorUIEvent) {
 }
 
 function newFretFromInput(newInput: number) {
-    const currentNote = selectedNoteController.getSelectedNote().note;
+    const currentNote = selectedNoteController.getSelectedNote();
     const currentFret = currentNote.fret;
     let newFret;
     if (currentFret >= 0 && currentFret <= 9) {
