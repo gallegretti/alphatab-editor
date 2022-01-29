@@ -96,7 +96,6 @@ class SelectedNoteController {
     }
 
     moveSelectedNoteHorizontal(getBeat) {
-        console.log('moveSelectedNoteHorizontal');
         const note = this.currentSelectedNote.note;
         if (!note) {
             return;
@@ -126,7 +125,6 @@ class SelectedNoteController {
                 return;
             }
             const newBounds = this.renderer.boundsLookup.getNoteBounds(this.currentSelectedNote.note);
-            console.log('newBounds', newBounds);
             selectedNoteOverlay.drawSelectedNote(newBounds.noteHeadBounds);
         } catch (e) {
             console.error(e);
