@@ -1,11 +1,11 @@
-import { EditorActionEvent } from "./editor-action-event";
+import { EditorActionEvent, EditorActionResult } from "./editor-action-event";
 import { addNote } from "./actions/add-note";
 import { removeNote } from "./actions/remove-note";
 import { setFret } from "./actions/set-fret";
 
 export default class EditorActions {
 
-    public doAction(action: EditorActionEvent) {
+    public doAction(action: EditorActionEvent): EditorActionResult {
         console.log(action);
         // If a new action is performed and the index is not at the end,
         // invalidate everything after it
@@ -14,27 +14,35 @@ export default class EditorActions {
             this.actionsIndex = this.actions.length - 1;
         }
 
+        let result: EditorActionResult = {
+            requiresRerender: false
+        };
+
         if (action.type === 'add-note') {
-            addNote(action.data.beat, action.data.note);
+            result = addNote(action.data.beat, action.data.note);
         }
         if (action.type === 'remove-note') {
-            removeNote(action.data.note);
+            result = removeNote(action.data.note);
         }
         if (action.type === 'set-fret') {
             // Store previous fret so we can undo
             action.data.previousFret = action.data.note.fret;
-            setFret(action.data.note, action.data.fret);
+            result = setFret(action.data.note, action.data.fret);
         }
 
         // And then add this action as the next on the list
         this.actions.push(action);
         this.actionsIndex++;
+
+        return result;
     }
 
-    public redoAction(): boolean {
+    public redoAction(): EditorActionResult {
         const actionToRedo = this.actionToRedo();
         if (!actionToRedo) {
-            return false;
+            return {
+                requiresRerender: false
+            };
         }
         if (actionToRedo.type === 'add-note') {
             addNote(actionToRedo.data.beat, actionToRedo.data.note);
@@ -46,13 +54,17 @@ export default class EditorActions {
             setFret(actionToRedo.data.note, actionToRedo.data.fret);
         }
         this.actionsIndex++;
-        return true;
+        return {
+            requiresRerender: true
+        };
     }
 
-    public undoAction(): boolean {
+    public undoAction(): EditorActionResult {
         const actionToUndo = this.actionToUndo();
         if (!actionToUndo) {
-            return false;
+            return {
+                requiresRerender: false
+            };
         }
         if (actionToUndo.type === 'add-note') {
             removeNote(actionToUndo.data.note);
@@ -64,7 +76,9 @@ export default class EditorActions {
             setFret(actionToUndo.data.note, actionToUndo.data.previousFret);
         }
         this.actionsIndex--;
-        return true;
+        return {
+            requiresRerender: true
+        };
     }
 
     private actionToRedo() {

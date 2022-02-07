@@ -3,6 +3,7 @@ import createEventEmitter from './event-emitter';
 import { EditorUIEvent } from './editor-ui-event';
 import EditorActions from './editor-actions/editor-actions';
 import { Note } from '../dist/types/model/Note';
+import { EditorActionEvent, EditorActionResult } from './editor-actions/editor-action-event';
 
 const alphaTab = (window as any).alphaTab;
 
@@ -13,15 +14,24 @@ const at = (window as any).at;
 const editorActions = new EditorActions();
 const selectedNoteController = new SelectedNoteController(at.renderer);
 
+function dispatchAction(action: EditorActionEvent) {
+    const result = editorActions.doAction(action);
+    handlerActionResult(result);
+}
+
+function handlerActionResult(result: EditorActionResult) {
+    if (result.requiresRerender) {
+        at.render();
+    }
+}
+
 function onEditorUIEvent(UIeventData: EditorUIEvent) {
     console.log(UIeventData);
     if (UIeventData.type === 'string-mouse-down') {
         const note = new alphaTab.model.Note() as Note;
         note.fret = 0;
         note.string = UIeventData.data.stringNumber;
-        editorActions.doAction({ type: 'add-note', data: { beat: UIeventData.data.beat, note } });
-        // TODO: Detect if need to render (Might not if a note already exists on this location)
-        at.render();
+        dispatchAction({ type: 'add-note', data: { beat: UIeventData.data.beat, note } });
     }
     if (UIeventData.type === 'note-mouse-down') {
         selectedNoteController.toggleNoteSelection(UIeventData.data.note);
@@ -30,15 +40,13 @@ function onEditorUIEvent(UIeventData: EditorUIEvent) {
         UIeventData.rawEvent.preventDefault();
         const currentNote = selectedNoteController.getSelectedNote();
         const newFret = newFretFromInput(currentNote.fret, UIeventData.data.number);
-        editorActions.doAction({ type: 'set-fret', data: { note: currentNote, fret: newFret } })
-        at.render();
+        dispatchAction({ type: 'set-fret', data: { note: currentNote, fret: newFret } });
     }
     if (UIeventData.type === 'delete-selected-note') {
         const currentSelectedNote = selectedNoteController.getSelectedNote();
         if (currentSelectedNote) {
-            editorActions.doAction({ type: 'remove-note', data: { note: currentSelectedNote } });
+            dispatchAction({ type: 'remove-note', data: { note: currentSelectedNote } });
             selectedNoteController.setSelectedNote(null);
-            at.render();
         }
     }
     if (UIeventData.type === 'render-finished') {
@@ -69,16 +77,12 @@ function onEditorUIEvent(UIeventData: EditorUIEvent) {
         selectedNoteController.setSelectedNote(null);
     }
     if (UIeventData.type === 'undo-action') {
-        const success = editorActions.undoAction();
-        if (success) {
-            at.render();
-        }
+        const result = editorActions.undoAction();
+        handlerActionResult(result);
     }
     if (UIeventData.type === 'redo-action') {
-        const success = editorActions.redoAction();
-        if (success) {
-            at.render();
-        }
+        const result = editorActions.redoAction();
+        handlerActionResult(result);
     }
 }
 

@@ -25,6 +25,9 @@ interface EditorActionSetFret {
     }
 }
 
+export interface EditorActionResult {
+    requiresRerender: boolean;
+}
 
 export type EditorActionEvent = EditorActionEventAddNote | EditorActionEventRemoveNote | EditorActionSetFret;
    
