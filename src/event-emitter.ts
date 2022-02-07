@@ -34,8 +34,9 @@ function getStringNumber(y: number, barBounds: Bounds) {
 }
 
 $(window).on('alphaTab.beatMouseDown', (event, beat) => {
-    const y = (window.event as MouseEvent).pageY;
-    const x = (window.event as MouseEvent).offsetX;
+    const container = $('#alphaTab');
+    const x = (window.event as any).pageX - container.offset().left;
+    const y = (window.event as any).pageY - container.offset().top;
     const note = at.renderer.boundsLookup.getNoteAtPos(beat, x, y);
     const bounds = at.renderer.boundsLookup.getNoteBounds(note);
     if (bounds) {
