@@ -1,5 +1,5 @@
 import selectedNoteOverlay from './selected-note-overlay';
-import { ScoreRenderer } from "../dist/types/rendering/ScoreRenderer";
+import { IScoreRenderer } from "../dist/types/rendering/IScoreRenderer";
 import { Note } from '../dist/types/model/Note';
 import { Beat } from '../dist/types/model/Beat';
 
@@ -7,7 +7,7 @@ class SelectedNoteController {
 
     private currentSelectedNote: Note | null = null;
 
-    constructor(private renderer: ScoreRenderer) {
+    constructor(private renderer: IScoreRenderer) {
     }
 
     toggleNoteSelection(data: Note) {

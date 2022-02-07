@@ -1,18 +1,29 @@
 import SelectedNoteController from './selected-note-controller';
-import createEventEmitter from './event-emitter';
+import EventEmitter from './event-emitter';
 import { EditorUIEvent } from './editor-ui-event';
 import EditorActions from './editor-actions/editor-actions';
 import { Note } from '../dist/types/model/Note';
+import { AlphaTabApi } from '../dist/alphaTab';
 import { EditorActionEvent, EditorActionResult } from './editor-actions/editor-action-event';
 
+// Initialize AlphaTab
+const wrapper = document.querySelector(".at-wrap");
+const main = wrapper!.querySelector(".at-main");
+
+// initialize alphatab
+const settings = {
+  file: "https://www.alphatab.net/files/canon.gp",
+  core: {
+    includeNoteBounds: true
+  }
+};
+const api: AlphaTabApi = new (window as any).alphaTab.AlphaTabApi(main, settings);
 const alphaTab = (window as any).alphaTab;
 
-createEventEmitter(onEditorUIEvent);
-
-const at = (window as any).at;
+const eventEmitter = new EventEmitter(api.renderer, onEditorUIEvent);
 
 const editorActions = new EditorActions();
-const selectedNoteController = new SelectedNoteController(at.renderer);
+const selectedNoteController = new SelectedNoteController(api.renderer);
 
 function dispatchAction(action: EditorActionEvent) {
     const result = editorActions.doAction(action);
@@ -21,7 +32,7 @@ function dispatchAction(action: EditorActionEvent) {
 
 function handlerActionResult(result: EditorActionResult) {
     if (result.requiresRerender) {
-        at.render();
+        api.render();
     }
 }
 
