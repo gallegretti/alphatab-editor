@@ -83,7 +83,7 @@ function removeNote(note: Note) {
 }
 
 function addNoteOnClick(beat: Beat, stringNumber: number) {
-    const hasNoteOnString = beat.notes.includes((note: Note) => note.string === stringNumber);
+    const hasNoteOnString = beat.notes.find((note: Note) => note.string === stringNumber) !== undefined;
     if (hasNoteOnString) {
         // Do not add an existing note
         return;
