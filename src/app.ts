@@ -2,26 +2,22 @@ import SelectedNoteController from './selected-note-controller';
 import EventEmitter from './event-emitter';
 import { EditorUIEvent } from './editor-ui-event';
 import EditorActions from './editor-actions/editor-actions';
-import { Note } from '../dist/types/model/Note';
 import { AlphaTabApi } from '../dist/alphaTab';
 import { EditorActionEvent, EditorActionResult } from './editor-actions/editor-action-event';
 
 // Initialize AlphaTab
-const wrapper = document.querySelector(".at-wrap");
-const main = wrapper!.querySelector(".at-main");
-
-// initialize alphatab
+const main = document.getElementById('alphaTab');
 const settings = {
   file: "https://www.alphatab.net/files/canon.gp",
   core: {
     includeNoteBounds: true
   }
 };
-const api: AlphaTabApi = new (window as any).alphaTab.AlphaTabApi(main, settings);
-const alphaTab = (window as any).alphaTab;
+const alphaTab: typeof import('../dist/alphaTab') = (window as any).alphaTab;
+const api: AlphaTabApi = new alphaTab.AlphaTabApi(main!, settings);
 
+// Initialize editor
 const eventEmitter = new EventEmitter(api.renderer, onEditorUIEvent);
-
 const editorActions = new EditorActions();
 const selectedNoteController = new SelectedNoteController(api.renderer);
 
@@ -39,7 +35,7 @@ function handlerActionResult(result: EditorActionResult) {
 function onEditorUIEvent(UIeventData: EditorUIEvent) {
     console.log(UIeventData);
     if (UIeventData.type === 'string-mouse-down') {
-        const note = new alphaTab.model.Note() as Note;
+        const note = new alphaTab.model.Note();
         note.fret = 0;
         note.string = UIeventData.data.stringNumber;
         dispatchAction({ type: 'add-note', data: { beat: UIeventData.data.beat, note } });
