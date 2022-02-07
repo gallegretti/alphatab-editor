@@ -1,7 +1,7 @@
 import { EditorUIEvent } from "./editor-ui-event";
 import { Bounds } from "../dist/types/rendering/utils/Bounds";
 
-const callbacks: ((EditorUIEvent) => any)[] = [];
+const callbacks: ((arg: EditorUIEvent) => any)[] = [];
 
 const at = (window as any).at;
 
@@ -142,6 +142,6 @@ document.addEventListener('keydown', (event) => {
     }
 });
 
-export default function createEventEmitter(callback) {
+export default function createEventEmitter(callback: (arg: EditorUIEvent) => any) {
     callbacks.push(callback);
 }

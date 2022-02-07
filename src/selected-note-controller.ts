@@ -72,11 +72,11 @@ class SelectedNoteController {
         return availableNotes.find((newNote) => newNote.string < currentNote.string) ?? availableNotes.find((newNote) => newNote.string > currentNote.string);
     }
 
-    private selectAvailableNotes(currentBeat: Beat, getBeat) {
-        let beat = currentBeat;
+    private selectAvailableNotes(currentBeat: Beat, getBeat: (beat: Beat) => Beat | null) {
+        let beat: Beat | null = currentBeat;
         do {
             // Skip empty beats until the next beat with notes is found
-            beat = getBeat(beat, getBeat);
+            beat = getBeat(beat);
         } while (beat && beat.notes.length === 0)
         return beat?.notes;
     }
