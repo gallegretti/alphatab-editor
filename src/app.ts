@@ -14,8 +14,10 @@ const selectedNoteController = new SelectedNoteController(at.renderer);
 function onEditorUIEvent(UIevent: EditorUIEvent) {
     console.log(UIevent);
     if (UIevent.type === 'string-mouse-down') {
-        addNoteOnClick(UIevent.data.beat, UIevent.data.stringNumber);
-        at.render();
+        const note = addNoteOnClick(UIevent.data.beat, UIevent.data.stringNumber);
+        if (note) {
+            at.render();
+        }
     }
     if (UIevent.type === 'note-mouse-down') {
         selectedNoteController.toggleNoteSelection(UIevent.data.note);
