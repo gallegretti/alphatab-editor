@@ -1,7 +1,7 @@
 import { EditorUIEvent } from "./editor-ui-event";
 import { Bounds } from "../dist/types/rendering/utils/Bounds";
 
-const callbacks = [];
+const callbacks: ((EditorUIEvent) => any)[] = [];
 
 const at = (window as any).at;
 
@@ -34,9 +34,12 @@ function getStringNumber(y: number, barBounds: Bounds) {
 }
 
 $(window).on('alphaTab.beatMouseDown', (event, beat) => {
-    const container = $('#alphaTab');
-    const x = (window.event as any).pageX - container.offset().left;
-    const y = (window.event as any).pageY - container.offset().top;
+    const containerOffset = $('#alphaTab').offset();
+    if (containerOffset === undefined) {
+        return;
+    }
+    const x = (window.event as any).pageX - containerOffset.left;
+    const y = (window.event as any).pageY - containerOffset.top;
     const note = at.renderer.boundsLookup.getNoteAtPos(beat, x, y);
     const bounds = at.renderer.boundsLookup.getNoteBounds(note);
     if (bounds) {

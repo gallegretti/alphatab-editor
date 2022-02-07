@@ -39,8 +39,8 @@ function onEditorUIEvent(UIeventData: EditorUIEvent) {
     if (UIeventData.type === 'number-pressed' && selectedNoteController.hasSelectedNote()) {
         UIeventData.rawEvent.preventDefault();
         const currentNote = selectedNoteController.getSelectedNote();
-        const newFret = newFretFromInput(currentNote.fret, UIeventData.data.number);
-        dispatchAction({ type: 'set-fret', data: { note: currentNote, fret: newFret } });
+        const newFret = newFretFromInput(currentNote!.fret, UIeventData.data.number);
+        dispatchAction({ type: 'set-fret', data: { note: currentNote!, fret: newFret } });
     }
     if (UIeventData.type === 'delete-selected-note') {
         const currentSelectedNote = selectedNoteController.getSelectedNote();

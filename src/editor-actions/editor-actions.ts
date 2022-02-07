@@ -72,7 +72,7 @@ export default class EditorActions {
         if (actionToUndo.type === 'remove-note') {
             addNote(actionToUndo.data.note.beat, actionToUndo.data.note);
         }
-        if (actionToUndo.type === 'set-fret') {
+        if (actionToUndo.type === 'set-fret' && actionToUndo.data.previousFret) {
             setFret(actionToUndo.data.note, actionToUndo.data.previousFret);
         }
         this.actionsIndex--;

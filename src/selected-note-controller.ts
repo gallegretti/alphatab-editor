@@ -5,7 +5,7 @@ import { Beat } from '../dist/types/model/Beat';
 
 class SelectedNoteController {
 
-    private currentSelectedNote: Note = null;
+    private currentSelectedNote: Note | null = null;
 
     constructor(private renderer: ScoreRenderer) {
     }
@@ -31,7 +31,7 @@ class SelectedNoteController {
         return this.moveSelectedNoteVertical((beatNotes) => {
             return beatNotes
                 .sort((a, b) => a.string - b.string)
-                .find((note) => note.string > this.currentSelectedNote.string);
+                .find((note) => note.string > this.currentSelectedNote!.string);
         })
     }
 
@@ -39,7 +39,7 @@ class SelectedNoteController {
         return this.moveSelectedNoteVertical((beatNotes) => {
             return beatNotes
                 .sort((a, b) => b.string - a.string)
-                .find((note) => note.string < this.currentSelectedNote.string);
+                .find((note) => note.string < this.currentSelectedNote!.string);
         });
     }
 
@@ -47,11 +47,11 @@ class SelectedNoteController {
         return this.currentSelectedNote !== null;
     }
 
-    getSelectedNote(): Note {
+    getSelectedNote(): Note | null {
         return this.currentSelectedNote;
     }
 
-    setSelectedNote(data: Note) {
+    setSelectedNote(data: Note | null) {
         this.currentSelectedNote = data;
     }
 
@@ -81,7 +81,7 @@ class SelectedNoteController {
         return beat?.notes;
     }
 
-    private moveSelectedNoteVertical(getNote: (notes: Note[]) => Note) {
+    private moveSelectedNoteVertical(getNote: (notes: Note[]) => Note | undefined) {
         if (!this.currentSelectedNote) {
             return;
         }
@@ -94,7 +94,7 @@ class SelectedNoteController {
         this.redrawOverlay();
     }
 
-    private moveSelectedNoteHorizontal(getBeat: (beat: Beat) => Beat) {
+    private moveSelectedNoteHorizontal(getBeat: (beat: Beat) => Beat | null) {
         const note = this.currentSelectedNote;
         if (!note) {
             return;

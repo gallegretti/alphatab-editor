@@ -1,7 +1,7 @@
 import { Bounds } from "../dist/types/rendering/utils/Bounds"
 
 class SelectedNoteOverlay {
-    drawSelectedNote(bounds: Bounds) {
+    drawSelectedNote(bounds: Bounds | null) {
         const selectedNoteElementId = 'selected-note';
         const currentSelection = document.getElementById(selectedNoteElementId);
         if (currentSelection) {
@@ -27,7 +27,9 @@ class SelectedNoteOverlay {
             pointer-events: none;
         `;
         const alphaTabElement = document.getElementById('alphaTab');
-        alphaTabElement.appendChild(newSelection);
+        if (alphaTabElement !== null) {
+            alphaTabElement.appendChild(newSelection);
+        }
     }
 }
 
