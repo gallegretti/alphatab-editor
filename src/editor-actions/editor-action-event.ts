@@ -5,8 +5,7 @@ interface EditorActionEventAddNote {
     type: 'add-note',
     data: {
         beat: Beat,
-        fret: number,
-        string: number,
+        note: Note,
     }
 }
 

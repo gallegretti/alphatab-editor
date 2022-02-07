@@ -123,6 +123,20 @@ document.addEventListener('keydown', (event) => {
             data: {}
         })
     }
+    if (event.ctrlKey === true && event.key === 'z') {
+        emitEvent({
+            type: 'undo-action',
+            rawEvent: event,
+            data: {}
+        })
+    }
+    if (event.ctrlKey === true && event.key === 'y') {
+        emitEvent({
+            type: 'redo-action',
+            rawEvent: event,
+            data: {}
+        })
+    }
 });
 
 export default function createEventEmitter(callback) {

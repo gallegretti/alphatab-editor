@@ -2,6 +2,9 @@ import SelectedNoteController from './selected-note-controller';
 import createEventEmitter from './event-emitter';
 import { EditorUIEvent } from './editor-ui-event';
 import EditorActions from './editor-actions/editor-actions';
+import { Note } from '../dist/types/model/Note';
+
+const alphaTab = (window as any).alphaTab;
 
 createEventEmitter(onEditorUIEvent);
 
@@ -13,7 +16,10 @@ const selectedNoteController = new SelectedNoteController(at.renderer);
 function onEditorUIEvent(UIeventData: EditorUIEvent) {
     console.log(UIeventData);
     if (UIeventData.type === 'string-mouse-down') {
-        editorActions.doAction({ type: 'add-note', data: { beat: UIeventData.data.beat, fret: 0, string: UIeventData.data.stringNumber } });
+        const note = new alphaTab.model.Note() as Note;
+        note.fret = 0;
+        note.string = UIeventData.data.stringNumber;
+        editorActions.doAction({ type: 'add-note', data: { beat: UIeventData.data.beat, note } });
         // TODO: Detect if need to render (Might not if a note already exists on this location)
         at.render();
     }
@@ -61,6 +67,14 @@ function onEditorUIEvent(UIeventData: EditorUIEvent) {
     if (UIeventData.type === 'deselect-cursor' && selectedNoteController.hasSelectedNote()) {
         UIeventData.rawEvent.preventDefault();
         selectedNoteController.setSelectedNote(null);
+    }
+    if (UIeventData.type === 'undo-action') {
+        editorActions.undoAction();
+        at.render();
+    }
+    if (UIeventData.type === 'redo-action') {
+        editorActions.redoAction();
+        at.render();
     }
 }
 

@@ -71,6 +71,17 @@ interface EditorUIEventDeselectCursor {
     data: {}
 }
 
+interface EditorUIEventUndoAction {
+    type: 'undo-action',
+    rawEvent: Event,
+    data: {}
+}
+
+interface EditorUIEventRedoAction {
+    type: 'redo-action',
+    rawEvent: Event,
+    data: {}
+}
 
 export type EditorUIEvent = 
     EditorUIEventNoteMouseDown |
@@ -82,4 +93,6 @@ export type EditorUIEvent =
     EditorUIEventMoveCursorRight |
     EditorUIEventMoveCursorUp |
     EditorUIEventMoveCursorDown |
-    EditorUIEventDeselectCursor;
+    EditorUIEventDeselectCursor |
+    EditorUIEventUndoAction |
+    EditorUIEventRedoAction;
