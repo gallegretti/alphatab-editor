@@ -69,12 +69,16 @@ function onEditorUIEvent(UIeventData: EditorUIEvent) {
         selectedNoteController.setSelectedNote(null);
     }
     if (UIeventData.type === 'undo-action') {
-        editorActions.undoAction();
-        at.render();
+        const success = editorActions.undoAction();
+        if (success) {
+            at.render();
+        }
     }
     if (UIeventData.type === 'redo-action') {
-        editorActions.redoAction();
-        at.render();
+        const success = editorActions.redoAction();
+        if (success) {
+            at.render();
+        }
     }
 }
 

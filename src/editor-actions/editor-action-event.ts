@@ -20,7 +20,8 @@ interface EditorActionSetFret {
     type: 'set-fret',
     data: {
         note: Note,
-        fret: number
+        fret: number,
+        previousFret?: number
     }
 }
 
